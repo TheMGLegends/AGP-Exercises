@@ -7,7 +7,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 {
 	Window window;
 
-	if (FAILED(window.InitiWindow(hInstance, nCmdShow)))
+	if (FAILED(window.InitWindow(hInstance, nCmdShow)))
 	{
 		MessageBox(NULL, L"Window Initialization Failed", L"Error", MB_ICONERROR | MB_OK);
 	}

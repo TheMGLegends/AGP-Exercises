@@ -4,7 +4,7 @@ Window::Window() : hInstance(nullptr), hWnd(nullptr), windowName(L"DirectX 11 Tu
 {
 }
 
-HRESULT Window::InitWindow(HINSTANCE hInstance, int nCmdShow)
+HRESULT Window::Init(HINSTANCE hInstance, int nCmdShow, int width, int height)
 {
 	this->hInstance = hInstance;
 
@@ -26,7 +26,7 @@ HRESULT Window::InitWindow(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// INFO: Adjust the window size
-	RECT wr = { 0, 0, 800, 600 };
+	RECT wr = { 0, 0, width, height };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
 	// INFO: Create the window and store a handle to it
