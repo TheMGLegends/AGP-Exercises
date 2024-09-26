@@ -20,7 +20,7 @@ HRESULT Window::Init(HINSTANCE hInstance, int nCmdShow, int width, int height)
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = L"WindowClass1";
-	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wc.hbrBackground = (HBRUSH)COLOR_HIGHLIGHTTEXT;
 
 	// INFO: Register the window class
 	if (!RegisterClassEx(&wc))
