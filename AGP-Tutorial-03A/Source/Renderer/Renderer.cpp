@@ -1,7 +1,6 @@
 #include "Renderer.h"
 
 #include <DirectXColors.h>
-#include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include <random>
 
