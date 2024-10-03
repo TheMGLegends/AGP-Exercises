@@ -20,6 +20,8 @@ HRESULT Window::Init(HINSTANCE _hInstance, int nCmdShow, int width, int height)
 	wc.lpfnWndProc = HandleMessageSetup;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = L"WindowClass1";
+	wc.hIcon = LoadIcon(NULL, IDI_SHIELD);
+	wc.hCursor = LoadCursor(NULL, IDC_HAND);
 
 	// INFO: Register the window class
 	if (!RegisterClassEx(&wc))
