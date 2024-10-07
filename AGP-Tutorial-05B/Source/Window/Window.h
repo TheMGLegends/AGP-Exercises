@@ -9,11 +9,10 @@ class Window
 {
 public:
 	Window();
-
 	HRESULT Init(HINSTANCE _hInstance, int nCmdShow, int width = 800, int height = 600);
+
 	static LRESULT CALLBACK HandleMessageSetup(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK HandleMessageRepeated(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 	LRESULT HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void OpenConsole();

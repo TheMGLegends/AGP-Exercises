@@ -1,25 +1,16 @@
 #include "Renderer.h"
 
-#include <random>
-#include <iostream>
-#include <algorithm>
+#include <DirectXMath.h>
+#include <DirectXColors.h>
 
 #include "../ReadData/ReadData.h"
 
-// INFO: Define the vertex structure
-struct Vertex
-{
-	XMFLOAT3 position;
-	XMFLOAT4 color;
-};
+#include "../Constant Buffers/CBufferWVP.h"
+#include "../Vertex/Vertex.h"
 
-// INFO: Define the constant buffer structure that stores WVP matrix
-struct CBUFFER0
-{
-	XMMATRIX WVP;
-};
+using namespace DirectX;
 
-Renderer::Renderer() : xPosition(0.0f), yPosition(0.0f)
+Renderer::Renderer()
 {
 	// Initialize all member variables
 	pSwapChain = nullptr;
@@ -32,18 +23,9 @@ Renderer::Renderer() : xPosition(0.0f), yPosition(0.0f)
 	pVertexBuffer = nullptr;
 	pConstantBuffer0 = nullptr;
 	pIndexBuffer = nullptr;
+	pZBuffer = nullptr;
 	width = 0;
 	height = 0;
-	camera = {};
-
-	cube1.position = XMFLOAT3(0.0f, 0.0f, 2.0f);
-	cube1.rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	cube1.scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
-
-	cube2.position = XMFLOAT3(1.0f, 0.0f, 2.0f);
-	cube2.rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	cube2.scale = XMFLOAT3(1.5f, 1.5f, 1.5f);
-
 }
 
 HRESULT Renderer::Init(HWND hWnd)
@@ -344,8 +326,8 @@ void Renderer::InitGraphics()
 
 void Renderer::InitScene()
 {
-	cube2.position = { 0.7f, 0.0f, 3.0f };
-	cube2.rotation = { 0, XMConvertToRadians(45), 0 };
+	cube2.SetPosition({ 0.7f, 0.0f, 3.0f });
+	cube2.SetRotation({ 0, XMConvertToRadians(45), 0 });
 }
 
 void Renderer::Clean()
@@ -365,13 +347,88 @@ void Renderer::Clean()
 
 void Renderer::RenderFrame()
 {
-	// INFO: Clear the back buffer to a solid color
-	pDeviceContext->ClearRenderTargetView(pRenderTargetView, Colors::DarkSeaGreen);
+	// INFO: Camera Logic
 
-	// INFO: Clear the depth buffer
+	float speed = 0.001f;
+	float pitch = camera.GetPitch();
+	float yaw = camera.GetYaw();
+
+
+	// INFO: Camera Movement
+
+	if (moveForward)
+	{
+		camera.AddPosition
+		(
+			XMFLOAT3{
+				speed * sin(yaw) * sin(pitch),
+				speed * cos(pitch),
+				speed * cos(yaw) * sin(pitch)
+			}
+		);
+	}
+
+	if (moveBackward)
+	{
+		camera.AddPosition
+		(
+			XMFLOAT3{
+				-(speed * sin(yaw) * sin(pitch)),
+				-(speed * cos(pitch)),
+				-(speed * cos(yaw) * sin(pitch))
+			}
+		);
+	}
+
+	if (moveLeft)
+	{
+		camera.AddPosition
+		(
+			-(speed * cos(yaw)),
+			0.0f,
+			-(speed * (-sin(yaw)))
+		);
+	}
+
+	if (moveRight)
+	{
+		camera.AddPosition
+		(
+			speed * cos(yaw),
+			0.0f,
+			speed * (-sin(yaw))
+		);
+	}
+
+
+	// INFO: Camera Rotation
+
+	if (pitchUp)
+	{
+		camera.AddPitch(-speed / 3);
+	}
+
+	if (pitchDown)
+	{
+		camera.AddPitch(speed / 3);
+	}
+
+	if (yawLeft)
+	{
+		camera.AddYaw(-speed / 3);
+	}
+
+	if (yawRight)
+	{
+		camera.AddYaw(speed / 3);
+	}
+
+
+	// INFO: Clear the back buffer to a solid color and clear the depth buffer
+	pDeviceContext->ClearRenderTargetView(pRenderTargetView, Colors::DarkSeaGreen);
 	pDeviceContext->ClearDepthStencilView(pZBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// INFO: Tutorial 3B - Select which vertex, index buffer and primitive topology to use (PER MESH)
+	// INFO: Select which vertex, index buffer and primitive topology to use (PER MESH)
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	pDeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
@@ -379,71 +436,6 @@ void Renderer::RenderFrame()
 
 	// INFO: Set primitive topology
 	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// TESTING WVP Matrix
-	//static float fakeTime = 0.0f;
-	//fakeTime += 0.0001f;
-	//rotation.y = cos(fakeTime);
-	//rotation.z = sin(fakeTime);
-	//position.x = sin(fakeTime) / 2.0f;
-	//position.y = sin(fakeTime) / 2.0f;
-	//scale.x = sin(fakeTime);
-	//scale.y = sin(fakeTime);
-	//scale.z = sin(fakeTime);
-
-	float speed = 0.001f;
-
-	if (moveForward)
-	{
-		camera.x += speed * sin(camera.yaw) * sin(camera.pitch);
-		camera.y += speed * cos(camera.pitch);
-		camera.z += speed * cos(camera.yaw) * sin(camera.pitch);
-	}
-
-	if (moveBackward)
-	{
-		camera.x -= speed * sin(camera.yaw) * sin(camera.pitch);
-		camera.y -= speed * cos(camera.pitch);
-		camera.z -= speed * cos(camera.yaw) * sin(camera.pitch);
-	}
-
-	if (moveLeft)
-	{
-		camera.x -= speed * cos(camera.yaw);
-		camera.z -= speed * (-sin(camera.yaw));
-	}
-
-	if (moveRight)
-	{
-		camera.x += speed * cos(camera.yaw);
-		camera.z += speed * (-sin(camera.yaw));
-	}
-
-	if (pitchUp)
-	{
-		camera.pitch -= speed / 3;
-
-		// INFO: Prevent pitch from going lower than -180 degrees	
-		camera.pitch = std::clamp(camera.pitch, XMConvertToRadians(1), XMConvertToRadians(179));
-	}
-
-	if (pitchDown)
-	{
-		camera.pitch += speed / 3;
-
-		// INFO: Prevent pitch from going higher than 180 degrees
-		camera.pitch = std::clamp(camera.pitch, XMConvertToRadians(1), XMConvertToRadians(179));
-	}
-
-	if (yawLeft)
-	{
-		camera.yaw -= speed / 3;
-	}
-
-	if (yawRight)
-	{
-		camera.yaw += speed / 3;
-	}
 
 	XMMATRIX world, view, projection;
 
@@ -490,11 +482,3 @@ void Renderer::RenderFrame()
 	// INFO: Present the back buffer to the screen
 	pSwapChain->Present(0, 0);
 }
-
-//void Renderer::SetColor(FLOAT r, FLOAT g, FLOAT b, FLOAT a)
-//{
-//	color[0] = r;
-//	color[1] = g;
-//	color[2] = b;
-//	color[3] = a;
-//}
