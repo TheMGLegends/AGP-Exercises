@@ -10,22 +10,10 @@
 
 using namespace DirectX;
 
-Renderer::Renderer()
+Renderer::Renderer() : pDevice(nullptr), pDeviceContext(nullptr), pSwapChain(nullptr), pRenderTargetView(nullptr), pZBuffer(nullptr),
+					   pVertexBuffer(nullptr), pIndexBuffer(nullptr), pConstantBuffer0(nullptr), pInputLayout(nullptr), pVertexShader(nullptr), 
+					   pPixelShader(nullptr), width(0), height(0), camera(), cube1(), cube2()
 {
-	// Initialize all member variables
-	pSwapChain = nullptr;
-	pDevice = nullptr;
-	pDeviceContext = nullptr;
-	pRenderTargetView = nullptr;
-	pVertexShader = nullptr;
-	pPixelShader = nullptr;
-	pInputLayout = nullptr;
-	pVertexBuffer = nullptr;
-	pConstantBuffer0 = nullptr;
-	pIndexBuffer = nullptr;
-	pZBuffer = nullptr;
-	width = 0;
-	height = 0;
 }
 
 HRESULT Renderer::Init(HWND hWnd)
@@ -347,83 +335,6 @@ void Renderer::Clean()
 
 void Renderer::RenderFrame()
 {
-	// INFO: Camera Logic
-
-	float speed = 0.001f;
-	float pitch = camera.GetPitch();
-	float yaw = camera.GetYaw();
-
-
-	// INFO: Camera Movement
-
-	if (moveForward)
-	{
-		camera.AddPosition
-		(
-			XMFLOAT3{
-				speed * sin(yaw) * sin(pitch),
-				speed * cos(pitch),
-				speed * cos(yaw) * sin(pitch)
-			}
-		);
-	}
-
-	if (moveBackward)
-	{
-		camera.AddPosition
-		(
-			XMFLOAT3{
-				-(speed * sin(yaw) * sin(pitch)),
-				-(speed * cos(pitch)),
-				-(speed * cos(yaw) * sin(pitch))
-			}
-		);
-	}
-
-	if (moveLeft)
-	{
-		camera.AddPosition
-		(
-			-(speed * cos(yaw)),
-			0.0f,
-			-(speed * (-sin(yaw)))
-		);
-	}
-
-	if (moveRight)
-	{
-		camera.AddPosition
-		(
-			speed * cos(yaw),
-			0.0f,
-			speed * (-sin(yaw))
-		);
-	}
-
-
-	// INFO: Camera Rotation
-
-	if (pitchUp)
-	{
-		camera.AddPitch(-speed / 3);
-	}
-
-	if (pitchDown)
-	{
-		camera.AddPitch(speed / 3);
-	}
-
-	if (yawLeft)
-	{
-		camera.AddYaw(-speed / 3);
-	}
-
-	if (yawRight)
-	{
-		camera.AddYaw(speed / 3);
-	}
-
-
 	// INFO: Clear the back buffer to a solid color and clear the depth buffer
 	pDeviceContext->ClearRenderTargetView(pRenderTargetView, Colors::DarkSeaGreen);
 	pDeviceContext->ClearDepthStencilView(pZBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

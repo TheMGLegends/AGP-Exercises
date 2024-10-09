@@ -4,7 +4,9 @@
 
 using namespace DirectX;
 
-Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pitch{ XM_PIDIV2 }, yaw{ 0.0f }
+Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pitch{ XM_PIDIV2 }, yaw{ 0.0f }, 
+				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.001f },
+				   rotationSpeed{ 0.0005f }
 {
 }
 
@@ -22,6 +24,43 @@ XMMATRIX Camera::GetViewMatrix()
 	XMMATRIX view = XMMatrixLookToLH(eyePos, lookTo, camUp);
 
 	return view;
+}
+
+void Camera::Update()
+{
+	if (moveWS != 0)
+	{
+		AddPosition
+		(
+			XMFLOAT3{
+				static_cast<float>(moveWS * speed * sin(yaw) * sin(pitch)),
+				static_cast<float>(moveWS * speed * cos(pitch)),
+				static_cast<float>(moveWS * speed * cos(yaw) * sin(pitch))
+			}
+		);
+	}
+
+	if (moveAD != 0)
+	{
+		AddPosition
+		(
+			XMFLOAT3{
+				static_cast<float>(moveAD * speed * cos(yaw)),
+				0,
+				static_cast<float>(moveAD * speed * -sin(yaw))
+			}
+		);
+	}
+
+	if (pitchUpDown != 0)
+	{
+		AddPitch(pitchUpDown * rotationSpeed);
+	}
+
+	if (yawLeftRight != 0)
+	{
+		AddYaw(yawLeftRight * rotationSpeed);
+	}
 }
 
 void Camera::AddPitch(float p)

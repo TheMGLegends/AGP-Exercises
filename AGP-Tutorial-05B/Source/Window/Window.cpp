@@ -107,28 +107,20 @@ LRESULT Window::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			switch (wParam)
 			{
 				case 'W':
-					renderer->moveForward = false;
+				case 'S':
+					renderer->GetCamera().SetMoveWS(0.0f);
 					break;
 				case 'A':
-					renderer->moveLeft = false;
-					break;
-				case 'S':
-					renderer->moveBackward = false;
-					break;
 				case 'D':
-					renderer->moveRight = false;
+					renderer->GetCamera().SetMoveAD(0.0f);
 					break;
 				case VK_UP:
-					renderer->pitchUp = false;
-					break;
 				case VK_DOWN:
-					renderer->pitchDown = false;
+					renderer->GetCamera().SetPitchUpDown(0.0f);
 					break;
 				case VK_LEFT:
-					renderer->yawLeft = false;
-					break;
 				case VK_RIGHT:
-					renderer->yawRight = false;
+					renderer->GetCamera().SetYawLeftRight(0.0f);
 					break;
 			}
 			break;
@@ -141,78 +133,35 @@ LRESULT Window::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 					DestroyWindow(hWnd);
 					break;
 				case 'W':
-				{
-					renderer->moveForward = true;
-
-					//renderer->AddYPosition(0.1f);
-					//renderer->camera.z += 0.25f;
-					//MessageBox(NULL, L"W was pressed!", L"Key Press", MB_ICONINFORMATION | MB_OK);
+					renderer->GetCamera().SetMoveWS(1.0f);
 					break;
-				}
-				case 'A':
-				{
-					renderer->moveLeft = true;
-
-					//renderer->AddXPosition(-0.1f);
-					//renderer->camera.x -= 0.25f;
-					break;
-				}
 				case 'S':
-				{
-					renderer->moveBackward = true;
-
-					//renderer->AddYPosition(-0.1f);
-					//renderer->camera.z -= 0.25f;
+					renderer->GetCamera().SetMoveWS(-1.0f);
 					break;
-				}
 				case 'D':
-				{
-					renderer->moveRight = true;
-
-					//renderer->camera.x += 0.25f;
-					//renderer->AddXPosition(0.1f);
+					renderer->GetCamera().SetMoveAD(1.0f);
 					break;
-				}
+				case 'A':
+					renderer->GetCamera().SetMoveAD(-1.0f);
+					break;
 				case VK_UP:
-				{
-					renderer->pitchUp = true;
-
-					//renderer->camera.pitch -= DirectX::XM_PI / 8;
-					//renderer->SetColor(1.0f, 0.0f, 0.0f);
+					renderer->GetCamera().SetPitchUpDown(-1.0f);
 					break;
-				}
 				case VK_DOWN:
-				{
-					renderer->pitchDown = true;
-
-					//renderer->camera.pitch += DirectX::XM_PI / 8;
-					//renderer->SetColor(0.0f, 1.0f, 0.0f);
+					renderer->GetCamera().SetPitchUpDown(1.0f);
 					break;
-				}
 				case VK_LEFT:
-				{
-					renderer->yawLeft = true;
-
-					//renderer->camera.yaw -= DirectX::XM_PI / 8;
-					//renderer->SetColor(0.0f, 0.0f, 1.0f);
+					renderer->GetCamera().SetYawLeftRight(-1.0f);
 					break;
-				}
 				case VK_RIGHT:
-				{
-					renderer->yawRight = true;
-
-					//renderer->camera.yaw += DirectX::XM_PI / 8;
-					//renderer->SetColor(1.0f, 1.0f, 0.0f);
+					renderer->GetCamera().SetYawLeftRight(1.0f);
 					break;
-				}
 			}
 			break;
 		}
-
 		default:
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
-
 	return 0;
 }
 
@@ -250,6 +199,7 @@ void Window::Run()
 		else
 		{
 			// INFO: Game Code Here
+			renderer->GetCamera().Update();
 			renderer->RenderFrame();
 		}
 	}

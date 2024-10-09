@@ -20,19 +20,12 @@ public:
 
 	void RenderFrame();
 
-	Camera camera;
-
-	bool moveForward = false;
-	bool moveBackward = false;
-	bool moveLeft = false;
-	bool moveRight = false;
-
-	bool pitchUp = false;
-	bool pitchDown = false;
-	bool yawLeft = false;
-	bool yawRight = false;
+	Camera& GetCamera() { return camera; }
 
 private:
+	UINT width; // Width of the Window
+	UINT height; // Height of the Window
+
 	IDXGISwapChain* pSwapChain;
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pDeviceContext;
@@ -52,7 +45,6 @@ private:
 	Transform cube1;
 	Transform cube2;
 
-	UINT width; // Width of the Window
-	UINT height; // Height of the Window
+	Camera camera;
 };
 
