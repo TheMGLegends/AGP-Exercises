@@ -21,8 +21,12 @@ Renderer::Renderer() : pDevice(nullptr), pDeviceContext(nullptr), pSwapChain(nul
 
 HRESULT Renderer::Init(HWND hWnd)
 {
+	HRESULT hr = {};
+
+	hWndCache = hWnd;
+
 	// INFO: Get window size
-	RECT rc = {};
+	rc = {};
 	GetClientRect(hWnd, &rc);
 	width = rc.right - rc.left;
 	height = rc.bottom - rc.top;
@@ -44,7 +48,6 @@ HRESULT Renderer::Init(HWND hWnd)
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	// INFO: Create device, device context and swap chain
-	HRESULT hr = {};
 	hr = D3D11CreateDeviceAndSwapChain(NULL, 
 		D3D_DRIVER_TYPE_HARDWARE, 
 		NULL, 
@@ -142,8 +145,46 @@ HRESULT Renderer::InitPipeline()
 	auto vertexShaderBytecode = DX::ReadData(L"Compiled Shaders/VertexShader.cso");
 	auto pixelShaderBytecode = DX::ReadData(L"Compiled Shaders/PixelShader.cso");
 
-	// INFO: Initialize Text2D
+	// INFO: Initialize Text2D (Bad Way)
 	pText = new Text2D("Assets/Fonts/font1.png", pDevice, pDeviceContext);
+
+	// INFO: Text Rendering (Good Way) Independent Resources
+	hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&pDWriteFactory));
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	renderText = L"Health Amount: 50";
+	renderTextLength = (UINT32)wcslen(renderText);
+
+	hr = pDWriteFactory->CreateTextFormat(L"Gabriola", NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 72.0f, L"en-us", &pTextFormat);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	// INFO: Text Rendering (Good Way) Dependent Resources
+	D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
+	if (!pHwndRenderTarget)
+	{
+		hr = pD2DFactory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(hWndCache, size), &pHwndRenderTarget);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+	}
+
+	hr = pHwndRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &pBlackBrush);
 
 	// INFO: Create vertex shader object
 	hr = pDevice->CreateVertexShader(vertexShaderBytecode.data(), vertexShaderBytecode.size(), NULL, &pVertexShader);
@@ -366,6 +407,11 @@ void Renderer::InitScene()
 
 void Renderer::Clean()
 {
+	if (pTextFormat) pTextFormat->Release();
+	if (pDWriteFactory) pDWriteFactory->Release();
+	if (pBlackBrush) pBlackBrush->Release();
+	if (pHwndRenderTarget) pHwndRenderTarget->Release();
+	if (pD2DFactory) pD2DFactory->Release();
 	if (pAlphaBlendStateDisable) pAlphaBlendStateDisable->Release();
 	if (pAlphaBlendStateEnable) pAlphaBlendStateEnable->Release();
 	if (pText) delete pText; pText = nullptr;
@@ -445,13 +491,19 @@ void Renderer::RenderFrame()
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pConstantBuffer0);
 	pDeviceContext->DrawIndexed(36, 0, 0);
 
-	// INFO: Add Text
+	// INFO: Add Text (Bad Way)
 	pText->AddText("Hello World", -1.0f, 1.0f, 0.075f);
 
 	// INFO: Render Text with Transparency (Alpha Blending)
 	pDeviceContext->OMSetBlendState(pAlphaBlendStateEnable, NULL, 0xFFFFFFFF);
 	pText->RenderText();
 	pDeviceContext->OMSetBlendState(pAlphaBlendStateDisable, NULL, 0xFFFFFFFF);
+
+	// INFO: Draw Text (Good Way)
+	float dpi = GetDpiForWindow(hWndCache);
+	D2D1_RECT_F layoutRect = D2D1::RectF(rc.left / dpi, rc.top / dpi, (rc.right - rc.left) / dpi, (rc.bottom - rc.top) / dpi);
+
+	pHwndRenderTarget->DrawTextW(renderText, renderTextLength, pTextFormat, layoutRect, pBlackBrush);
 
 	// INFO: Present the back buffer to the screen
 	pSwapChain->Present(0, 0);

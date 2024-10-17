@@ -2,6 +2,8 @@
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <d2d1.h>
+#include <dwrite.h>
 
 #include "../Camera/Camera.h"
 #include "../Transform/Transform.h"
@@ -25,6 +27,8 @@ public:
 	Camera& GetCamera() { return camera; }
 
 private:
+	HWND hWndCache;
+
 	UINT width; // Width of the Window
 	UINT height; // Height of the Window
 
@@ -46,7 +50,22 @@ private:
 	ID3D11ShaderResourceView* pTexture;
 	ID3D11SamplerState* pSamplerState;
 	
+	// INFO: Text Rendering (Bad Way)
 	Text2D* pText;
+
+	// INFO: Text Rendering (Good Way)
+	IDWriteFactory* pDWriteFactory;
+	IDWriteTextFormat* pTextFormat;
+
+	ID2D1Factory* pD2DFactory;
+	ID2D1HwndRenderTarget* pHwndRenderTarget;
+	ID2D1SolidColorBrush* pBlackBrush;
+
+	const wchar_t* renderText;
+	UINT32 renderTextLength;
+
+	RECT rc;
+
 
 	ID3D11BlendState* pAlphaBlendStateEnable;
 	ID3D11BlendState* pAlphaBlendStateDisable;
