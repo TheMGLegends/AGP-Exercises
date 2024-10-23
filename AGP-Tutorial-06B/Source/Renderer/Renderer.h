@@ -4,6 +4,10 @@
 #include <d3dcompiler.h>
 #include <d2d1.h>
 #include <dwrite.h>
+#include <memory>
+
+#include <SpriteBatch.h>
+#include <SpriteFont.h>
 
 #include "../Camera/Camera.h"
 #include "../Transform/Transform.h"
@@ -66,6 +70,9 @@ private:
 
 	RECT rc;
 
+	// INFO: Text Rendering (Different Different Way)
+	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;
+	std::unique_ptr<DirectX::SpriteFont> spriteFont;
 
 	ID3D11BlendState* pAlphaBlendStateEnable;
 	ID3D11BlendState* pAlphaBlendStateDisable;

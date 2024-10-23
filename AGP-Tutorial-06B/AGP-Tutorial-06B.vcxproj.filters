@@ -74,10 +74,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Assets\Fonts\myfile.spriteFont" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\VertexShader.hlsl" />
     <FxCompile Include="Shaders\PixelShader.hlsl" />
     <FxCompile Include="Shaders\text2D_shaders.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Assets\Fonts\gamingFont.ttf" />
   </ItemGroup>
 </Project>

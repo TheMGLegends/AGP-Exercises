@@ -173,6 +173,10 @@ HRESULT Renderer::InitPipeline()
 	pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
+	// INFO: Text Rendering (Different Different Way)
+	spriteBatch = std::make_unique<SpriteBatch>(pDeviceContext);
+	spriteFont = std::make_unique<SpriteFont>(pDevice, L"Assets/Fonts/myfile.spritefont");
+
 	// INFO: Text Rendering (Good Way) Dependent Resources
 	D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
 	if (!pHwndRenderTarget)
@@ -407,6 +411,7 @@ void Renderer::InitScene()
 
 void Renderer::Clean()
 {
+	spriteFont.reset();
 	if (pTextFormat) pTextFormat->Release();
 	if (pDWriteFactory) pDWriteFactory->Release();
 	if (pBlackBrush) pBlackBrush->Release();
@@ -492,11 +497,11 @@ void Renderer::RenderFrame()
 	pDeviceContext->DrawIndexed(36, 0, 0);
 
 	// INFO: Add Text (Bad Way)
-	pText->AddText("Hello World", -1.0f, 1.0f, 0.075f);
+	//pText->AddText("Hello World", -1.0f, 1.0f, 0.075f);
 
 	// INFO: Render Text with Transparency (Alpha Blending)
 	pDeviceContext->OMSetBlendState(pAlphaBlendStateEnable, NULL, 0xFFFFFFFF);
-	pText->RenderText();
+	//pText->RenderText();
 	pDeviceContext->OMSetBlendState(pAlphaBlendStateDisable, NULL, 0xFFFFFFFF);
 
 	// INFO: Draw Text (Good Way)
@@ -504,6 +509,11 @@ void Renderer::RenderFrame()
 	D2D1_RECT_F layoutRect = D2D1::RectF(rc.left / dpi, rc.top / dpi, (rc.right - rc.left) / dpi, (rc.bottom - rc.top) / dpi);
 
 	pHwndRenderTarget->DrawTextW(renderText, renderTextLength, pTextFormat, layoutRect, pBlackBrush);
+
+	// INFO: Draw Text(Different Different Way)
+	spriteBatch->Begin();
+	spriteFont->DrawString(spriteBatch.get(), L"Hello world!", XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	spriteBatch->End();
 
 	// INFO: Present the back buffer to the screen
 	pSwapChain->Present(0, 0);
