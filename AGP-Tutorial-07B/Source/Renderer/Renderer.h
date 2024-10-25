@@ -50,6 +50,8 @@ private:
 	ID3D11Buffer* pIndexBuffer;
 
 	ID3D11DepthStencilView* pZBuffer;
+	ID3D11DepthStencilState* pDepthStencilState;
+	D3D11_VIEWPORT viewport;
 
 	ID3D11ShaderResourceView* pTexture;
 	ID3D11SamplerState* pSamplerState;

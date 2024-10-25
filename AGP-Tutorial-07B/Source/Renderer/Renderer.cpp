@@ -15,7 +15,7 @@ using namespace DirectX;
 Renderer::Renderer() : pDevice(nullptr), pDeviceContext(nullptr), pSwapChain(nullptr), pRenderTargetView(nullptr), pZBuffer(nullptr),
 					   pVertexBuffer(nullptr), pIndexBuffer(nullptr), pConstantBuffer0(nullptr), pInputLayout(nullptr), pVertexShader(nullptr), 
 					   pPixelShader(nullptr), pTexture(nullptr), pSamplerState(nullptr), pText(nullptr), pAlphaBlendStateEnable(nullptr), 
-					   pAlphaBlendStateDisable(nullptr), width(0), height(0), camera(), cube1(), cube2()
+					   pAlphaBlendStateDisable(nullptr), width(0), height(0), camera(), cube1(), cube2(), viewport()
 {
 }
 
@@ -111,14 +111,13 @@ HRESULT Renderer::Init(HWND hWnd)
 	pDeviceContext->OMSetRenderTargets(1, &pRenderTargetView, pZBuffer);
 
 	// INFO: Set the viewport
-	D3D11_VIEWPORT vp = {};
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	vp.Width = (FLOAT)width;
-	vp.Height = (FLOAT)height;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	pDeviceContext->RSSetViewports(1, &vp);
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = (FLOAT)width;
+	viewport.Height = (FLOAT)height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	pDeviceContext->RSSetViewports(1, &viewport);
 
 	if (FAILED(hr))
 	{
@@ -440,6 +439,11 @@ void Renderer::RenderFrame()
 	// INFO: Clear the back buffer to a solid color and clear the depth buffer
 	pDeviceContext->ClearRenderTargetView(pRenderTargetView, Colors::DarkSeaGreen);
 	pDeviceContext->ClearDepthStencilView(pZBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	// INFO: Reset to use depth buffer otherwise the text method fucks it
+	pDeviceContext->OMSetDepthStencilState(pDepthStencilState, 1);
+	pDeviceContext->OMSetRenderTargets(1, &pRenderTargetView, pZBuffer);
+	pDeviceContext->RSSetViewports(1, &viewport);
 
 	// INFO: Select which vertex, index buffer and primitive topology to use (PER MESH)
 	UINT stride = sizeof(Vertex);
