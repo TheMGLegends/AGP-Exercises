@@ -28,7 +28,7 @@ public:
 
 	inline void SetSpeed(float s) { speed = s; }
 
-
+	void ResetCamera();
 
 private:
 	DirectX::XMFLOAT3 position;

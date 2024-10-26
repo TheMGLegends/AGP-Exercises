@@ -6,7 +6,7 @@ using namespace DirectX;
 
 Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pitch{ XM_PIDIV2 }, yaw{ 0.0f }, 
 				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.001f },
-				   rotationSpeed{ 0.0005f }
+				   rotationSpeed{ 0.001f }
 {
 }
 
@@ -38,6 +38,8 @@ void Camera::Update()
 				static_cast<float>(moveWS * speed * cos(yaw) * sin(pitch))
 			}
 		);
+
+		moveWS = 0.0f;
 	}
 
 	if (moveAD != 0)
@@ -50,6 +52,8 @@ void Camera::Update()
 				static_cast<float>(moveAD * speed * -sin(yaw))
 			}
 		);
+
+		moveAD = 0.0f;
 	}
 
 	if (pitchUpDown != 0)
@@ -68,4 +72,17 @@ void Camera::AddPitch(float p)
 	pitch += p;
 
 	pitch = std::clamp(pitch, XMConvertToRadians(minMaxPitch.x), XMConvertToRadians(minMaxPitch.y));
+}
+
+void Camera::ResetCamera()
+{
+	position = { 0.0f, 0.0f, 0.0f };
+	pitch = XM_PIDIV2;
+	yaw = 0.0f;
+	moveWS = 0.0f;
+	moveAD = 0.0f;
+	pitchUpDown = 0.0f;
+	yawLeftRight = 0.0f;
+	speed = 0.001f;
+	rotationSpeed = 0.0005f;
 }

@@ -58,6 +58,10 @@ HRESULT Window::Init(HINSTANCE _hInstance, int nCmdShow, int width, int height)
 		MessageBox(NULL, L"Renderer Initialization Failed", L"Critical Error", MB_ICONERROR | MB_OK);
 	}
 
+	// INFO: Intialize Mouse
+	DirectX::Mouse::Get().SetWindow(hWnd);
+	DirectX::Mouse::Get().SetMode(DirectX::Mouse::MODE_RELATIVE);
+
 	return S_OK;
 }
 
@@ -163,6 +167,28 @@ LRESULT Window::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			}*/
 			break;
 		}
+		case WM_INPUT:
+		{
+			DirectX::Mouse::ProcessMessage(uMsg, wParam, lParam);
+			break;
+		}
+		case WM_MOUSEACTIVATE:
+			return MA_ACTIVATEANDEAT;
+		case WM_MOUSEMOVE:
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_MOUSEWHEEL:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+		case WM_MOUSEHOVER:
+		{
+			DirectX::Mouse::ProcessMessage(uMsg, wParam, lParam);
+			break;
+		}
 		default:
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
@@ -174,49 +200,40 @@ void Window::HandleInput()
 	auto keyboardState = DirectX::Keyboard::Get().GetState();
 	keyboardStateTracker.Update(keyboardState);
 
+	auto mouseState = DirectX::Mouse::Get().GetState();
+	mouseStateTracker.Update(mouseState);
+
 	if (keyboardState.Escape)
 	{
 		PostQuitMessage(0);
 	}
 
-	if (keyboardStateTracker.pressed.W)
+	if (keyboardState.W)
 	{
 		renderer->GetCamera().SetMoveWS(1.0f);
 	}
 
-	if (keyboardStateTracker.released.W)
-	{
-		renderer->GetCamera().SetMoveWS(0.0f);
-	}
-
-	if (keyboardStateTracker.pressed.S)
+	if (keyboardState.S)
 	{
 		renderer->GetCamera().SetMoveWS(-1.0f);
 	}
 
-	if (keyboardStateTracker.released.S)
-	{
-		renderer->GetCamera().SetMoveWS(0.0f);
-	}
-
-	if (keyboardStateTracker.pressed.A)
+	if (keyboardState.A)
 	{
 		renderer->GetCamera().SetMoveAD(-1.0f);
 	}
 
-	if (keyboardStateTracker.released.A)
-	{
-		renderer->GetCamera().SetMoveAD(0.0f);
-	}
-
-	if (keyboardStateTracker.pressed.D)
+	if (keyboardState.D)
 	{
 		renderer->GetCamera().SetMoveAD(1.0f);
 	}
 
-	if (keyboardStateTracker.released.D)
+	renderer->GetCamera().SetYawLeftRight(static_cast<float>(mouseState.x));
+	renderer->GetCamera().SetPitchUpDown(static_cast<float>(mouseState.y));
+
+	if (mouseStateTracker.leftButton == DirectX::Mouse::ButtonStateTracker::PRESSED)
 	{
-		renderer->GetCamera().SetMoveAD(0.0f);
+		renderer->GetCamera().ResetCamera();
 	}
 }
 

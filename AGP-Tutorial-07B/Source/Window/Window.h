@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <memory>
 #include <Keyboard.h>
+#include <Mouse.h>
 
 #include "../Renderer/Renderer.h"
 
@@ -33,5 +34,8 @@ private:
 
 	DirectX::Keyboard keyboard;
 	DirectX::Keyboard::KeyboardStateTracker keyboardStateTracker;
+
+	DirectX::Mouse mouse;
+	DirectX::Mouse::ButtonStateTracker mouseStateTracker;
 };
 
