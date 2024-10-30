@@ -834,7 +834,7 @@ void Renderer::RenderFrame()
 
 	// INFO: Draw Text(Different Different Way)
 	spriteBatch->Begin();
-	spriteFont->DrawString(spriteBatch.get(), L"Hello world!", XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	spriteFont->DrawString(spriteBatch.get(), L"+10000 Aura", XMFLOAT2(0, 0), DirectX::Colors::Cyan, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
 	spriteBatch->End();
 
 	// INFO: Present the back buffer to the screen
