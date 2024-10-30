@@ -462,10 +462,10 @@ void Renderer::InitGraphics()
 
 	// INFO: Load Models
 	model = new ObjFileModel{ (char*)"Assets/Models/Sphere.obj", pDevice, pDeviceContext };
-	modelSkybox = new ObjFileModel{ (char*)"Assets/Models/Sphere.obj", pDevice, pDeviceContext };
+	modelSkybox = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
 
 	// INFO: Load skybox cube map
-	hr = CreateDDSTextureFromFile(pDevice, pDeviceContext, L"Assets/skybox01.dds", NULL, &pSkyboxTexture);
+	hr = CreateDDSTextureFromFile(pDevice, pDeviceContext, L"Assets/TestCubemap.dds", NULL, &pSkyboxTexture);
 	if (FAILED(hr))
 	{
 		OutputDebugString(L"Failed to create DDS Texture\n");
@@ -844,7 +844,7 @@ void Renderer::RenderFrame()
 
 	// INFO: Draw Text(Different Different Way)
 	spriteBatch->Begin();
-	spriteFont->DrawString(spriteBatch.get(), L"Hello World!", XMFLOAT2(0, 0), DirectX::Colors::Cyan, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	spriteFont->DrawString(spriteBatch.get(), L"Hello World!", XMFLOAT2(0, 0), DirectX::Colors::Yellow, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
 	spriteBatch->End();
 
 	// INFO: Present the back buffer to the screen
