@@ -11,7 +11,14 @@
 
 #include <WICTextureLoader.h>
 
+#include <DDSTextureLoader.h>
+
 using namespace DirectX;
+
+struct CBufferSkybox
+{
+	XMMATRIX WVP;
+};
 
 Renderer::Renderer() : pDevice(nullptr), pDeviceContext(nullptr), pSwapChain(nullptr), pRenderTargetView(nullptr), pZBuffer(nullptr),
 					   pVertexBuffer(nullptr), pIndexBuffer(nullptr), pConstantBuffer0(nullptr), pInputLayout(nullptr), pVertexShader(nullptr), 
@@ -146,9 +153,9 @@ HRESULT Renderer::InitPipeline()
 {
 	HRESULT hr = {};
 
-	// INFO: Load the compiled vertex shader & pixel shader
-	auto vertexShaderBytecode = DX::ReadData(L"Compiled Shaders/VertexShader.cso");
-	auto pixelShaderBytecode = DX::ReadData(L"Compiled Shaders/PixelShader.cso");
+	// INFO: Text Rendering (Different Different Way)
+	spriteBatch = std::make_unique<SpriteBatch>(pDeviceContext);
+	spriteFont = std::make_unique<SpriteFont>(pDevice, L"Assets/Fonts/myfile.spritefont");
 
 	// INFO: Initialize Text2D (Bad Way)
 	//pText = new Text2D("Assets/Fonts/font1.png", pDevice, pDeviceContext);
@@ -178,10 +185,6 @@ HRESULT Renderer::InitPipeline()
 	//pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	//pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-	// INFO: Text Rendering (Different Different Way)
-	spriteBatch = std::make_unique<SpriteBatch>(pDeviceContext);
-	spriteFont = std::make_unique<SpriteFont>(pDevice, L"Assets/Fonts/myfile.spritefont");
-
 	// INFO: Text Rendering (Good Way) Dependent Resources
 	//D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
 	//if (!pHwndRenderTarget)
@@ -194,6 +197,10 @@ HRESULT Renderer::InitPipeline()
 	//}
 	//
 	//hr = pHwndRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &pBlackBrush);
+	
+	/*
+	// INFO: Load the compiled vertex shader
+	auto vertexShaderBytecode = DX::ReadData(L"Compiled Shaders/VertexShader.cso");
 
 	// INFO: Create vertex shader object
 	hr = pDevice->CreateVertexShader(vertexShaderBytecode.data(), vertexShaderBytecode.size(), NULL, &pVertexShader);
@@ -201,17 +208,6 @@ HRESULT Renderer::InitPipeline()
 	{
 		return hr;
 	}
-
-	// INFO: Create pixel shader object
-	hr = pDevice->CreatePixelShader(pixelShaderBytecode.data(), pixelShaderBytecode.size(), NULL, &pPixelShader);
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	// INFO: Set the shaders (Usually done per draw call)
-	//pDeviceContext->VSSetShader(pVertexShader, NULL, 0);
-	//pDeviceContext->PSSetShader(pPixelShader, NULL, 0);
 
 	// INFO: Create a vertex shader reflection object
 	ID3D11ShaderReflection* pVertexShaderReflection = nullptr;
@@ -222,7 +218,7 @@ HRESULT Renderer::InitPipeline()
 		return hr;
 	}
 
-	// INFO: Get shader description
+	// INFO: Get vertex shader description
 	D3D11_SHADER_DESC vertexShaderDescription = {};
 	pVertexShaderReflection->GetDesc(&vertexShaderDescription);
 
@@ -232,13 +228,6 @@ HRESULT Renderer::InitPipeline()
 	{
 		pVertexShaderReflection->GetInputParameterDesc(i, &pSignatureParameterDescriptions[i]);
 	}
-
-	// INFO: Create input layout description (Manually)
-	//D3D11_INPUT_ELEMENT_DESC ied[] = 
-	//{
-	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	//};
 
 	// INFO: Create input layout description (Programmatically)
 	D3D11_INPUT_ELEMENT_DESC* ied = new D3D11_INPUT_ELEMENT_DESC[vertexShaderDescription.InputParameters]{ 0 };
@@ -273,12 +262,41 @@ HRESULT Renderer::InitPipeline()
 		return hr;
 	}
 
-	// INFO: Set the input layout (Usually done per draw call)
-	//pDeviceContext->IASetInputLayout(pInputLayout);
-
 	// INFO: Release temporay heap memory
 	delete[] pSignatureParameterDescriptions;
 	delete[] ied;
+	
+	// INFO: Load the compiled pixel shader
+	auto pixelShaderBytecode = DX::ReadData(L"Compiled Shaders/PixelShader.cso");
+
+	// INFO: Create pixel shader object
+	hr = pDevice->CreatePixelShader(pixelShaderBytecode.data(), pixelShaderBytecode.size(), NULL, &pPixelShader);
+	if (FAILED(hr))
+	{
+		return hr;
+	}*/
+	
+	// INFO: VS and PS for cubes
+	LoadVertexShader(L"Compiled Shaders/VertexShader.cso", &pVertexShader, &pInputLayout);
+	LoadPixelShader(L"Compiled Shaders/PixelShader.cso", &pPixelShader);
+
+	// INFO: VS and PS for Skybox
+	LoadVertexShader(L"Compiled Shaders/SkyboxVShader.cso", &pVSSkybox, &pInputLayoutSkybox);
+	LoadPixelShader(L"Compiled Shaders/SkyboxPShader.cso", &pPSSkybox);
+
+	// INFO: Set the shaders (Usually done per draw call)
+	//pDeviceContext->VSSetShader(pVertexShader, NULL, 0);
+	//pDeviceContext->PSSetShader(pPixelShader, NULL, 0);
+
+	// INFO: Create input layout description (Manually)
+	//D3D11_INPUT_ELEMENT_DESC ied[] = 
+	//{
+	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	//};
+
+	// INFO: Set the input layout (Usually done per draw call)
+	//pDeviceContext->IASetInputLayout(pInputLayout);
 
 	// INFO: Create blend state descriptions
 	//D3D11_BLEND_DESC blendDescEnable = {};
@@ -388,6 +406,14 @@ void Renderer::InitGraphics()
 		return;
 	}
 
+	// INFO: Create Constant Buffer for skybox
+	cbd.ByteWidth = sizeof(CBufferSkybox);
+	if (FAILED(pDevice->CreateBuffer(&cbd, NULL, &pSkyboxCBuffer)))
+	{
+		OutputDebugString(L"Failed to create skybox constant buffer\n");
+		return;
+	}
+
 	// INFO: Create Indices Array to represent a cube
 	unsigned int indices[] =
 	{
@@ -432,6 +458,14 @@ void Renderer::InitGraphics()
 
 	// INFO: Load Model
 	model = new ObjFileModel{ (char*)"Assets/Models/Sphere.obj", pDevice, pDeviceContext };
+
+	// INFO: Load skybox cube map
+	hr = CreateDDSTextureFromFile(pDevice, pDeviceContext, L"Assets/skybox01.dds", NULL, &pSkyboxTexture);
+	if (FAILED(hr))
+	{
+		OutputDebugString(L"Failed to create DDS Texture\n");
+		return;
+	}
 }
 
 void Renderer::InitScene()
@@ -446,6 +480,134 @@ void Renderer::InitScene()
 	// INFO: Set up point lights
 	pointLights[0] = { XMVECTOR{1.5f, 0.0f, -1.0f}, {0.9f, 0.0f, 0.85f, 1.0f}, 10, true };
 	pointLights[1] = { XMVECTOR{-1.5f, 0.0f, -1.0f}, {0.0f, 0.9f, 0.85f, 1.0f}, 20, true };
+}
+
+HRESULT Renderer::LoadVertexShader(LPCWSTR filename, ID3D11VertexShader** vs, ID3D11InputLayout** il)
+{
+	HRESULT hr;
+
+	// INFO: Load the compiled vertex shader
+	auto vertexShaderBytecode = DX::ReadData(filename);
+
+	// INFO: Create vertex shader object
+	hr = pDevice->CreateVertexShader(vertexShaderBytecode.data(), vertexShaderBytecode.size(), NULL, vs);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	// INFO: Create a vertex shader reflection object
+	ID3D11ShaderReflection* pVertexShaderReflection = nullptr;
+	hr = D3DReflect(vertexShaderBytecode.data(), vertexShaderBytecode.size(), IID_ID3D11ShaderReflection, (void**)&pVertexShaderReflection);
+	if (FAILED(hr))
+	{
+		OutputDebugString(L"Failed to create vertex shader reflection object\n");
+		return hr;
+	}
+
+	// INFO: Get vertex shader description
+	D3D11_SHADER_DESC vertexShaderDescription = {};
+	pVertexShaderReflection->GetDesc(&vertexShaderDescription);
+
+	// INFO: Get input parameter descriptions
+	D3D11_SIGNATURE_PARAMETER_DESC* pSignatureParameterDescriptions = new D3D11_SIGNATURE_PARAMETER_DESC[vertexShaderDescription.InputParameters]{ 0 };
+	for (UINT i = 0; i < vertexShaderDescription.InputParameters; i++)
+	{
+		pVertexShaderReflection->GetInputParameterDesc(i, &pSignatureParameterDescriptions[i]);
+	}
+
+	// INFO: Create input layout description (Programmatically)
+	D3D11_INPUT_ELEMENT_DESC* ied = new D3D11_INPUT_ELEMENT_DESC[vertexShaderDescription.InputParameters]{ 0 };
+	for (size_t i = 0; i < vertexShaderDescription.InputParameters; i++)
+	{
+		ied[i].SemanticName = pSignatureParameterDescriptions[i].SemanticName;
+		ied[i].SemanticIndex = pSignatureParameterDescriptions[i].SemanticIndex;
+
+		if (pSignatureParameterDescriptions[i].ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+		{
+			switch (pSignatureParameterDescriptions[i].Mask)
+			{
+			case 1: ied[i].Format = DXGI_FORMAT_R32_FLOAT; break; // float1
+			case 3: ied[i].Format = DXGI_FORMAT_R32G32_FLOAT; break; // float2
+			case 7: ied[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break; // float3
+			case 15: ied[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break; // float4
+			default: break;
+			}
+		}
+
+		ied[i].InputSlot = 0;
+		ied[i].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		ied[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		ied[i].InstanceDataStepRate = 0;
+	}
+
+	// INFO: Create input layout object
+	hr = pDevice->CreateInputLayout(ied, vertexShaderDescription.InputParameters, vertexShaderBytecode.data(), vertexShaderBytecode.size(), il);
+	if (FAILED(hr))
+	{
+		OutputDebugString(L"Fialed to create input layout\n");
+		return hr;
+	}
+
+	// INFO: Release temporay heap memory
+	delete[] pSignatureParameterDescriptions;
+	delete[] ied;
+
+	return S_OK;
+}
+
+HRESULT Renderer::LoadPixelShader(LPCWSTR filename, ID3D11PixelShader** ps)
+{
+	HRESULT hr;
+
+	// INFO: Load the compiled pixel shader
+	auto pixelShaderBytecode = DX::ReadData(filename);
+
+	// INFO: Create pixel shader object
+	hr = pDevice->CreatePixelShader(pixelShaderBytecode.data(), pixelShaderBytecode.size(), NULL, ps);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return S_OK;
+}
+
+void Renderer::DrawSkybox()
+{
+	// INFO: Front-face culling and disable depth write
+	pDeviceContext->OMSetDepthStencilState(pDepthWriteSkyBox, 1);
+	pDeviceContext->RSSetState(pRasterSkyBox);
+
+	// INFO: Set skybox shaders
+	pDeviceContext->VSSetShader(pVSSkybox, 0, 0);
+	pDeviceContext->PSSetShader(pPSSkybox, 0, 0);
+	pDeviceContext->IASetInputLayout(pInputLayoutSkybox);
+
+	// INFO: Constant buffer data
+	CBufferSkybox cbuf;
+	XMMATRIX translation, projection, view;
+	translation = XMMatrixTranslation(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(60), width / static_cast<float>(height), 0.1f, 100);
+	view = camera.GetViewMatrix();
+	cbuf.WVP = translation * view * projection;
+	pDeviceContext->UpdateSubresource(pSkyboxCBuffer, 0, 0, &cbuf, 0, 0);
+
+	// INFO: Set shader resources
+	pDeviceContext->VSSetConstantBuffers(0, 1, &pSkyboxCBuffer);
+	pDeviceContext->PSSetSamplers(0, 1, &pSamplerState);
+	pDeviceContext->PSSetShaderResources(0, 1, &pSkyboxTexture);
+
+	model->Draw();
+
+	// INFO: Back-face culling and enable depth write
+	pDeviceContext->OMSetDepthStencilState(pDepthWriteSolid, 1);
+	pDeviceContext->RSSetState(pRasterSolid);
+
+	// INFO: Set standard shaders back
+	pDeviceContext->VSSetShader(pVertexShader, 0, 0);
+	pDeviceContext->PSSetShader(pPixelShader, 0, 0);
+	pDeviceContext->IASetInputLayout(pInputLayout);
 }
 
 void Renderer::Clean()
@@ -497,6 +659,8 @@ void Renderer::RenderFrame()
 	// INFO: Clear the back buffer to a solid color and clear the depth buffer
 	pDeviceContext->ClearRenderTargetView(pRenderTargetView, Colors::DarkSeaGreen);
 	pDeviceContext->ClearDepthStencilView(pZBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	DrawSkybox();
 
 	// INFO: Reset to use depth buffer otherwise the text method fucks it
 	pDeviceContext->OMSetDepthStencilState(pDepthStencilState, 1);

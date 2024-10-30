@@ -28,6 +28,11 @@ public:
 	void InitGraphics();
 	void InitScene();
 
+	HRESULT LoadVertexShader(LPCWSTR filename, ID3D11VertexShader** vs, ID3D11InputLayout** il);
+	HRESULT LoadPixelShader(LPCWSTR filename, ID3D11PixelShader** ps);
+
+	void DrawSkybox();
+
 	void Clean();
 
 	void RenderFrame();

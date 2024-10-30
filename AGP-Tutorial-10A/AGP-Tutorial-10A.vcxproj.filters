@@ -83,6 +83,8 @@
     <FxCompile Include="Shaders\VertexShader.hlsl" />
     <FxCompile Include="Shaders\PixelShader.hlsl" />
     <FxCompile Include="Shaders\text2D_shaders.hlsl" />
+    <FxCompile Include="Shaders\SkyboxVShader.hlsl" />
+    <FxCompile Include="Shaders\SkyboxPShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Assets\Fonts\gamingFont.ttf" />
