@@ -493,7 +493,7 @@ void Renderer::InitGraphics()
 
 void Renderer::InitScene()
 {
-	cube2.SetPosition({ 2.0f, 0.0f, 3.0f });
+	cube2.SetPosition({ 2.0f, 0.0f, 10.0f });
 	cube1.SetPosition({ 0.0f, 0.0f, 1.5f });
 	cube2.SetRotation({ 0, XMConvertToRadians(-45), 0 });
 
@@ -505,9 +505,9 @@ void Renderer::InitScene()
 	pointLights[1] = { XMVECTOR{-1.5f, 0.0f, -1.0f}, {0.0f, 0.9f, 0.85f, 1.0f}, 20, true };
 
 	// INFO: Set up particle
-	particle.colour = { 1.0f, 0.0f, 0.3f, 1.0f };
-	particle.gravity = 1.0f;
-	particle.transform.SetPosition(0.0f, 0.3f, 14.0f);
+	particle.colour = { 1.0f, 0.5f, 0.3f, 1.0f };
+	particle.gravity = 0.0f;
+	particle.transform.SetPosition(2.0f, 0.0f, 3.0f);
 	particle.velocity = { 0.0f, 0.0f, 0.0f };
 }
 
@@ -609,11 +609,11 @@ HRESULT Renderer::LoadParticle()
 	XMFLOAT3 vertices[6] =
 	{
 		XMFLOAT3{-1.0f, -1.0f, 0.0f},
-		XMFLOAT3{1.0f, 1.0f, 0.0f},
 		XMFLOAT3{-1.0f, 1.0f, 0.0f},
-		XMFLOAT3{-1.0f, -1.0f, 0.0f},
+		XMFLOAT3{1.0f, 1.0f, 0.0f},
+		XMFLOAT3{1.0f, 1.0f, 0.0f},
 		XMFLOAT3{1.0f, -1.0f, 0.0f},
-		XMFLOAT3{1.0f, 1.0f, 0.0f}
+		XMFLOAT3{-1.0f, -1.0f, 0.0f}
 	};
 
 	D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -908,7 +908,7 @@ void Renderer::RenderFrame()
 	model->Draw();
 
 	// INFO: Draw particle
-	pDeviceContext->RSSetState(pRasterParticle);
+	pDeviceContext->RSSetState(pRasterParticleSolid);
 
 	pDeviceContext->VSSetShader(pVSParticle, 0, 0);
 	pDeviceContext->PSSetShader(pPSParticle, 0, 0);
@@ -918,8 +918,8 @@ void Renderer::RenderFrame()
 	cBufferParticle.WVP = world * view * projection;
 	cBufferParticle.colour = particle.colour;
 
-	particle.transform.SetPosition({ sin(t), particle.transform.GetPosition().y, cube1.GetPosition().z });
-	particle.transform.SetRotation({ sin(t) * 0.75f, cos(t) * 0.75f, cube1.GetRotation().z });
+	//particle.transform.SetPosition({ sin(t), particle.transform.GetPosition().y, cube1.GetPosition().z });
+	//particle.transform.SetRotation({ sin(t) * 0.75f, cos(t) * 0.75f, cube1.GetRotation().z });
 
 	stride = sizeof(XMFLOAT3);
 	pDeviceContext->IASetVertexBuffers(0, 1, &pParticleVertexBuffer, &stride, &offset);
@@ -927,8 +927,6 @@ void Renderer::RenderFrame()
 
 	pDeviceContext->UpdateSubresource(pParticleCBuffer, 0, 0, &cBufferParticle, 0, 0);
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pParticleCBuffer);
-
-	pDeviceContext->IASetInputLayout(pInputLayout);
 
 	pDeviceContext->Draw(6, 0);
 

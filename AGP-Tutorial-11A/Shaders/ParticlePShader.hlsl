@@ -1,6 +1,6 @@
 struct VIn
 {
-	float4 position : SV_POSITION;
+	float4 position : SV_Position;
     float4 colour : COLOR;
     float2 uv : TEXCOORD;
 };
