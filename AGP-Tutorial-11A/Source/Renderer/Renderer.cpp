@@ -489,6 +489,8 @@ void Renderer::InitGraphics()
 		OutputDebugString(L"Failed to create DDS Texture\n");
 		return;
 	}
+
+	LoadParticle();
 }
 
 void Renderer::InitScene()
@@ -908,7 +910,7 @@ void Renderer::RenderFrame()
 	model->Draw();
 
 	// INFO: Draw particle
-	pDeviceContext->RSSetState(pRasterParticleSolid);
+	pDeviceContext->RSSetState(pRasterParticle);
 
 	pDeviceContext->VSSetShader(pVSParticle, 0, 0);
 	pDeviceContext->PSSetShader(pPSParticle, 0, 0);
@@ -918,7 +920,7 @@ void Renderer::RenderFrame()
 	cBufferParticle.WVP = world * view * projection;
 	cBufferParticle.colour = particle.colour;
 
-	//particle.transform.SetPosition({ sin(t), particle.transform.GetPosition().y, cube1.GetPosition().z });
+	//particle.transform.SetPosition({ -sin(t), particle.transform.GetPosition().y, cube1.GetPosition().z });
 	//particle.transform.SetRotation({ sin(t) * 0.75f, cos(t) * 0.75f, cube1.GetRotation().z });
 
 	stride = sizeof(XMFLOAT3);
