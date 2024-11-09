@@ -496,10 +496,10 @@ void Renderer::InitGraphics()
 void Renderer::InitScene()
 {
 	cube2.SetPosition({ 2.0f, 0.0f, 10.0f });
-	cube1.SetPosition({ 0.0f, 0.0f, 1.5f });
+	cube1.SetPosition({ 0.0f, 5.0f, -10.0f });
 	cube2.SetRotation({ 0, XMConvertToRadians(-45), 0 });
 
-	cube3.SetPosition({ -2.0f, 0.0f, 3.0f });
+	cube3.SetPosition({ -10.0f, 0.0f, 3.0f });
 	cube3.SetRotation({ 0, XMConvertToRadians(-45), XMConvertToRadians(180) });
 
 	// INFO: Set up point lights
@@ -509,7 +509,8 @@ void Renderer::InitScene()
 	// INFO: Set up particle
 	particle.colour = { 1.0f, 0.5f, 0.3f, 1.0f };
 	particle.gravity = 0.0f;
-	particle.transform.SetPosition(2.0f, 0.0f, 3.0f);
+	particle.transform.SetPosition(0.0f, 0.0f, 3.0f);
+	particle.transform.SetRotation({ 0, XMConvertToRadians(90), 0 });
 	particle.velocity = { 0.0f, 0.0f, 0.0f };
 }
 
@@ -620,10 +621,10 @@ HRESULT Renderer::LoadParticle()
 
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	hr = pDevice->CreateRasterizerState(&rasterDesc, &pRasterParticleSolid);
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.CullMode = D3D11_CULL_FRONT;
 	hr = pDevice->CreateRasterizerState(&rasterDesc, &pRasterParticle);
 
 	// INFO: Create vertex buffer description
@@ -910,13 +911,13 @@ void Renderer::RenderFrame()
 	model->Draw();
 
 	// INFO: Draw particle
-	pDeviceContext->RSSetState(pRasterParticle);
 
 	pDeviceContext->VSSetShader(pVSParticle, 0, 0);
 	pDeviceContext->PSSetShader(pPSParticle, 0, 0);
 
 	CBufferParticle cBufferParticle = {};
 	world = particle.transform.GetWorldMatrix();
+	world = particle.LookAt_XZ(camera.GetPosition().x, camera.GetPosition().z) * world;
 	cBufferParticle.WVP = world * view * projection;
 	cBufferParticle.colour = particle.colour;
 
@@ -929,8 +930,11 @@ void Renderer::RenderFrame()
 
 	pDeviceContext->UpdateSubresource(pParticleCBuffer, 0, 0, &cBufferParticle, 0, 0);
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pParticleCBuffer);
-
+	
+	pDeviceContext->RSSetState(pRasterParticle); // INFO: Front face culling on
 	pDeviceContext->Draw(6, 0);
+
+
 
 	// INFO: Add Text (Bad Way)
 	//pText->AddText("Hello World", -1.0f, 1.0f, 0.075f);
