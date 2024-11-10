@@ -12,6 +12,7 @@
 #include <WICTextureLoader.h>
 
 #include <DDSTextureLoader.h>
+#include <list>
 
 using namespace DirectX;
 
@@ -576,11 +577,11 @@ HRESULT Renderer::LoadVertexShader(LPCWSTR filename, ID3D11VertexShader** vs, ID
 	hr = pDevice->CreateInputLayout(ied, vertexShaderDescription.InputParameters, vertexShaderBytecode.data(), vertexShaderBytecode.size(), il);
 	if (FAILED(hr))
 	{
-		OutputDebugString(L"Fialed to create input layout\n");
+		OutputDebugString(L"Failed to create input layout\n");
 		return hr;
 	}
 
-	// INFO: Release temporay heap memory
+	// INFO: Release temporary heap memory
 	delete[] pSignatureParameterDescriptions;
 	delete[] ied;
 
@@ -686,6 +687,88 @@ void Renderer::DrawSkybox()
 	pDeviceContext->VSSetShader(pVertexShader, 0, 0);
 	pDeviceContext->PSSetShader(pPixelShader, 0, 0);
 	pDeviceContext->IASetInputLayout(pInputLayout);
+}
+
+void Renderer::DrawParticleEmitter()
+{
+	XMMATRIX world, view, projection;
+
+	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(60), width / (float)height, 0.01f, 100.0f);
+	view = camera.GetViewMatrix();
+
+	UINT stride = sizeof(XMFLOAT3);
+	UINT offset = 0;
+
+	CBufferParticle cbuf;
+
+	float timeNow = (float)(timeGetTime()) / 1000.0f;
+	float deltaTime = 0.001f;
+	emitter.SetPreviousTime(timeNow);
+	emitter.SetUntilParticle(emitter.GetUntilParticle() - deltaTime);
+
+	std::list<Particle*>::iterator it;
+
+	if (emitter.GetUntilParticle() <= 0.0f)
+	{
+		it = emitter.m_free.begin();
+		
+		if (emitter.m_free.size() != NULL)
+		{
+			emitter.m_untilParticle = 0.008f;
+			(*it)->age = 5.0f;
+			(*it)->colour = XMFLOAT4(emitter.RandomZeroToOne(), emitter.RandomZeroToOne(), emitter.RandomZeroToOne(), 1.0f);
+			(*it)->gravity = 2.0f;
+			(*it)->transform.SetPosition(XMFLOAT3{0.0f, 1.0f, 3.0f});
+			(*it)->velocity = XMFLOAT3(emitter.RandomNegOneToPosOne(), 2.5f, emitter.RandomNegOneToPosOne());
+
+			emitter.m_active.push_back(*it);
+			emitter.m_free.pop_front();
+		}
+
+		emitter.SetUntilParticle(0.008f);
+	}
+
+	// INFO: Go through active list
+	if (emitter.m_active.size() != NULL)
+	{
+		it = emitter.m_active.begin();
+
+		while (it != emitter.m_active.end())
+		{
+			(*it)->age -= deltaTime;
+			(*it)->velocity.y -= (*it)->gravity * deltaTime;
+			(*it)->transform.SetPosition(XMFLOAT3{ (*it)->transform.GetPosition().x + (*it)->velocity.x * deltaTime, (*it)->transform.GetPosition().y, (*it)->transform.GetPosition().z });
+			(*it)->transform.SetPosition(XMFLOAT3{ (*it)->transform.GetPosition().x, (*it)->transform.GetPosition().y + (*it)->velocity.y * deltaTime, (*it)->transform.GetPosition().z });
+			(*it)->transform.SetPosition(XMFLOAT3{ (*it)->transform.GetPosition().x, (*it)->transform.GetPosition().y, (*it)->transform.GetPosition().z + (*it)->velocity.z * deltaTime });
+
+			world = (*it)->transform.GetWorldMatrix();
+			world = (*it)->LookAt_XZ(camera.GetPosition().x, camera.GetPosition().z) * world;
+			cbuf.WVP = world * view * projection;
+			cbuf.colour = (*it)->colour;
+
+			pDeviceContext->IASetVertexBuffers(0, 1, &pParticleVertexBuffer, &stride, &offset);
+			pDeviceContext->IASetInputLayout(pInputLayoutParticle);
+
+			pDeviceContext->UpdateSubresource(pParticleCBuffer, 0, 0, &cbuf, 0, 0);
+			pDeviceContext->VSSetConstantBuffers(0, 1, &pParticleCBuffer);
+
+			pDeviceContext->RSSetState(pRasterParticle);
+			pDeviceContext->Draw(6, 0);
+
+			if ((*it)->age <= 0.0f)
+			{
+				it++;
+				emitter.m_active.front()->age = 5.0f;
+				emitter.m_active.front()->transform.SetPosition(XMFLOAT3{ 0.0f, 1.0f, 3.0f });
+				emitter.m_active.front()->velocity = XMFLOAT3(emitter.RandomNegOneToPosOne(), 2.5f, emitter.RandomNegOneToPosOne());
+				emitter.m_free.push_back(emitter.m_active.front());
+
+				emitter.m_active.pop_front();
+			}
+			else it++;
+
+		}
+	}
 }
 
 void Renderer::Clean()
@@ -910,7 +993,6 @@ void Renderer::RenderFrame()
 	model->Draw();
 
 	// INFO: Draw particle
-
 	pDeviceContext->VSSetShader(pVSParticle, 0, 0);
 	pDeviceContext->PSSetShader(pPSParticle, 0, 0);
 
@@ -919,9 +1001,6 @@ void Renderer::RenderFrame()
 	world = particle.LookAt_XZ(camera.GetPosition().x, camera.GetPosition().z) * world;
 	cBufferParticle.WVP = world * view * projection;
 	cBufferParticle.colour = particle.colour;
-
-	//particle.transform.SetPosition({ -sin(t), particle.transform.GetPosition().y, cube1.GetPosition().z });
-	//particle.transform.SetRotation({ sin(t) * 0.75f, cos(t) * 0.75f, cube1.GetRotation().z });
 
 	stride = sizeof(XMFLOAT3);
 	pDeviceContext->IASetVertexBuffers(0, 1, &pParticleVertexBuffer, &stride, &offset);
@@ -933,6 +1012,9 @@ void Renderer::RenderFrame()
 	pDeviceContext->RSSetState(pRasterParticle); // INFO: Back face culling on
 	pDeviceContext->Draw(6, 0);
 
+
+	// INFO: Particle Emitter
+	DrawParticleEmitter();
 
 
 	// INFO: Add Text (Bad Way)

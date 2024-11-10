@@ -113,7 +113,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;D2d1.lib;Dwrite.lib;dxgi.lib;uuid.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;D2d1.lib;Dwrite.lib;dxgi.lib;uuid.lib;DirectXTK.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Particles\ParticleEmitter.cpp" />
     <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Application\App.cpp" />
     <ClCompile Include="Source\ObjModelLoader\objfilemodel.cpp" />
@@ -145,6 +146,8 @@
     <ClCompile Include="Source\Transform\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Particles\ParticleEmitter.h" />
+    <ClInclude Include="Source\Particles\Particle.h" />
     <ClInclude Include="Source\Camera\Camera.h" />
     <ClInclude Include="Source\Application\App.h" />
     <ClInclude Include="Source\Constant Buffers\CBufferWVP.h" />

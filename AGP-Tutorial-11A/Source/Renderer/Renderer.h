@@ -13,36 +13,10 @@
 #include "../Transform/Transform.h"
 #include "../Lights/PointLight.h"
 #include "../ObjModelLoader/objfilemodel.h"
+#include "../Particles/Particle.h"
+#include "../Particles/ParticleEmitter.h"
 
 #define MAX_POINT_LIGHTS 8
-
-struct Particle
-{
-	float gravity;
-	Transform transform;
-	DirectX::XMFLOAT3 velocity;
-	DirectX::XMFLOAT4 colour;
-
-	// INFO: Used to make the particle face the camera
-	XMMATRIX LookAt_XZ(float targetX, float targetZ)
-	{
-		//XMFLOAT3 particlePos = transform.GetPosition();
-		//
-		//return XMMatrixLookAtLH(XMLoadFloat3(&particlePos), XMVECTOR{ targetX, particlePos.y, targetZ }, XMVectorSet(0, 1, 0, 0));
-
-		XMFLOAT3 particlePos = transform.GetPosition();
-
-		// Calculate the direction vector from the particle to the target
-		float deltaX = targetX - particlePos.x;
-		float deltaZ = targetZ - particlePos.z;
-
-		// Calculate the angle in radians
-		float angle = -atan2f(deltaZ, deltaX);
-
-		// Create a rotation matrix around the Y-axis
-		return XMMatrixRotationY(angle - XMConvertToRadians(90.0f));
-	}
-};
 
 class Text2D;
 
@@ -62,6 +36,8 @@ public:
 	HRESULT LoadParticle();
 
 	void DrawSkybox();
+	
+	void DrawParticleEmitter();
 
 	void Clean();
 
@@ -155,6 +131,9 @@ private:
 	ID3D11Buffer* pParticleCBuffer;
 
 	Particle particle;
+
+	// INFO: Particle Emitter
+	ParticleEmitter emitter;
 
 	// WVP Matrix Testing Variables
 	Transform cube1;
