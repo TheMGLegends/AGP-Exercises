@@ -510,7 +510,6 @@ void Renderer::InitScene()
 	particle.colour = { 1.0f, 0.5f, 0.3f, 1.0f };
 	particle.gravity = 0.0f;
 	particle.transform.SetPosition(0.0f, 0.0f, 3.0f);
-	particle.transform.SetRotation({ 0, XMConvertToRadians(90), 0 });
 	particle.velocity = { 0.0f, 0.0f, 0.0f };
 }
 
@@ -621,10 +620,10 @@ HRESULT Renderer::LoadParticle()
 
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	hr = pDevice->CreateRasterizerState(&rasterDesc, &pRasterParticleSolid);
-	rasterDesc.CullMode = D3D11_CULL_FRONT;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
 	hr = pDevice->CreateRasterizerState(&rasterDesc, &pRasterParticle);
 
 	// INFO: Create vertex buffer description
@@ -931,7 +930,7 @@ void Renderer::RenderFrame()
 	pDeviceContext->UpdateSubresource(pParticleCBuffer, 0, 0, &cBufferParticle, 0, 0);
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pParticleCBuffer);
 	
-	pDeviceContext->RSSetState(pRasterParticle); // INFO: Front face culling on
+	pDeviceContext->RSSetState(pRasterParticle); // INFO: Back face culling on
 	pDeviceContext->Draw(6, 0);
 
 

@@ -40,7 +40,7 @@ struct Particle
 		float angle = -atan2f(deltaZ, deltaX);
 
 		// Create a rotation matrix around the Y-axis
-		return XMMatrixRotationY(angle);
+		return XMMatrixRotationY(angle - XMConvertToRadians(90.0f));
 	}
 };
 
