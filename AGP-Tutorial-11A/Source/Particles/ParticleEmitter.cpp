@@ -6,7 +6,7 @@
 ParticleEmitter::ParticleEmitter()
 {
 	// INFO: Initialize the free list with 100 particles
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 200; i++)
 	{
 		m_free.push_back(new Particle());
 	}
@@ -49,4 +49,11 @@ float ParticleEmitter::RandomNegOneToPosOne()
 {
 	float range = 1 - -1;
 	return -1 + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / range));
+}
+
+float ParticleEmitter::RandomRange(float min, float max)
+{
+	//INFO: Generate a random range between min and max(inclusive)
+	float range = max - min;
+	return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / range));
 }

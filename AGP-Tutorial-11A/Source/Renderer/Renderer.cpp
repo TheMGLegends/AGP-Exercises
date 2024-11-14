@@ -511,6 +511,7 @@ void Renderer::InitScene()
 	particle.colour = { 1.0f, 0.5f, 0.3f, 1.0f };
 	particle.gravity = 0.0f;
 	particle.transform.SetPosition(0.0f, 0.0f, 3.0f);
+	particle.transform.SetScale(0.25f, 0.25f, 0.25f);
 	particle.velocity = { 0.0f, 0.0f, 0.0f };
 }
 
@@ -715,10 +716,13 @@ void Renderer::DrawParticleEmitter()
 		if (emitter.m_free.size() != NULL)
 		{
 			emitter.m_untilParticle = 0.008f;
-			(*it)->age = 5.0f;
+			(*it)->age = emitter.RandomRange(3.0f, 7.5f);
 			(*it)->colour = XMFLOAT4(emitter.RandomZeroToOne(), emitter.RandomZeroToOne(), emitter.RandomZeroToOne(), 1.0f);
 			(*it)->gravity = 2.0f;
 			(*it)->transform.SetPosition(XMFLOAT3{0.0f, 1.0f, 3.0f});
+			
+			float scale = emitter.RandomRange(0.1f, 0.5f);
+			(*it)->transform.SetScale(XMFLOAT3{ scale, scale, scale });
 			(*it)->velocity = XMFLOAT3(emitter.RandomNegOneToPosOne(), 2.5f, emitter.RandomNegOneToPosOne());
 
 			emitter.m_active.push_back(*it);

@@ -21,6 +21,8 @@ public:
 	inline float GetUntilParticle() const { return m_untilParticle; }
 	inline void SetUntilParticle(float time) { m_untilParticle = time; }
 
+	float RandomRange(float min, float max);
+
 	std::list<Particle*> m_free;
 	std::list<Particle*> m_active;
 
