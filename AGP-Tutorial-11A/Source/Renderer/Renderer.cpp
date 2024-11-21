@@ -965,6 +965,7 @@ void Renderer::RenderFrame()
 
 	world = cube3.GetWorldMatrix();
 	cBuffer0.WVP = world * view * projection;
+	cBuffer0.WV = world * view;
 
 	// INFO: Lighting
 

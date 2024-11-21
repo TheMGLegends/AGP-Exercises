@@ -5,7 +5,7 @@
 using namespace DirectX;
 
 Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pitch{ XM_PIDIV2 }, yaw{ 0.0f }, 
-				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.001f },
+				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.005f },
 				   rotationSpeed{ 0.001f }
 {
 }
@@ -21,9 +21,7 @@ XMMATRIX Camera::GetViewMatrix()
 	};
 	XMVECTOR camUp{ 0, 1, 0 };
 
-	XMMATRIX view = XMMatrixLookToLH(eyePos, lookTo, camUp);
-
-	return view;
+	return XMMatrixLookToLH(eyePos, lookTo, camUp);
 }
 
 void Camera::Update()

@@ -76,16 +76,16 @@ VOut main(VIn input)
     output.colour = saturate(ambientLightCol + float4(directionalFinal, 1) + float4(pointFinal, 1));
     
     // INFO: Vertex position relative to camera
-    float3 wvpos = mul(WV, input.position);
+    float3 wvpos = mul(WV, float4(input.position, 0));
     
     // INFO: Surface normal relative to camera
     float3 wvnormal = mul(WV, float4(input.normal, 0));
     
     // INFO: Obtain reverse eye vector
-    float3 eyer = -normalize(wvpos);
+    float3 eyer = normalize(wvpos);
     
     // INFO: Obtain reverse reflection vector
-    output.reflectionUVW = 2.0 * dot(eyer, wvnormal) * wvnormal - eyer;
+    output.reflectionUVW = 2.0f * dot(eyer, wvnormal) * wvnormal - eyer;
     
     return output;
 }
