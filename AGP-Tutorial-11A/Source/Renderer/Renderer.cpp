@@ -480,7 +480,7 @@ void Renderer::InitGraphics()
 	pDevice->CreateSamplerState(&samplerDesc, &pSamplerState);
 
 	// INFO: Load Models
-	model = new ObjFileModel{ (char*)"Assets/Models/Sphere.obj", pDevice, pDeviceContext };
+	model = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
 	modelSkybox = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
 
 	// INFO: Load skybox cube map
@@ -496,12 +496,13 @@ void Renderer::InitGraphics()
 
 void Renderer::InitScene()
 {
-	cube2.SetPosition({ 2.0f, 0.0f, 10.0f });
 	cube1.SetPosition({ 0.0f, 5.0f, -10.0f });
-	cube2.SetRotation({ 0, XMConvertToRadians(-45), 0 });
+
+	cube2.SetPosition({ 2.0f, 0.0f, 10.0f });
+	cube2.SetRotation({ 0, XMConvertToRadians(0), 0 });
 
 	cube3.SetPosition({ -10.0f, 0.0f, 3.0f });
-	cube3.SetRotation({ 0, XMConvertToRadians(-45), XMConvertToRadians(180) });
+	//cube3.SetRotation({ 0, XMConvertToRadians(-45), XMConvertToRadians(180) });
 
 	// INFO: Set up point lights
 	pointLights[0] = { XMVECTOR{1.5f, 0.0f, -1.0f}, {0.9f, 0.0f, 0.85f, 1.0f}, 10, true };
@@ -925,6 +926,9 @@ void Renderer::RenderFrame()
 	//pDeviceContext->Draw(3, 0);
 
 
+	pDeviceContext->PSSetShaderResources(0, 1, &pTexture);
+	pDeviceContext->PSSetShaderResources(1, 1, &pSkyboxTexture);
+
 	// INFO: Duplicate for cube 2
 	world = cube2.GetWorldMatrix();
 	cBuffer0.WVP = world * view * projection;
@@ -960,7 +964,7 @@ void Renderer::RenderFrame()
 	pDeviceContext->DrawIndexed(36, 0, 0);
 
 	// INFO: Duplicate for cube 3
-	pDeviceContext->PSSetShaderResources(0, 1, &pTexture2);
+	pDeviceContext->PSSetShaderResources(0, 1, &pTexture);
 	pDeviceContext->PSSetShaderResources(1, 1, &pSkyboxTexture);
 
 	world = cube3.GetWorldMatrix();
@@ -1019,7 +1023,7 @@ void Renderer::RenderFrame()
 
 
 	// INFO: Particle Emitter
-	DrawParticleEmitter();
+	//DrawParticleEmitter();
 
 
 	// INFO: Add Text (Bad Way)

@@ -1,11 +1,13 @@
 #include "Camera.h"
 
+#include "SimpleMath.h"
+
 #include <algorithm>
 
 using namespace DirectX;
 
 Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pitch{ XM_PIDIV2 }, yaw{ 0.0f }, 
-				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.005f },
+				   moveWS{ 0.0f }, moveAD{ 0.0f }, pitchUpDown{ 0.0f }, yawLeftRight{ 0.0f }, speed { 0.001f },
 				   rotationSpeed{ 0.001f }
 {
 }

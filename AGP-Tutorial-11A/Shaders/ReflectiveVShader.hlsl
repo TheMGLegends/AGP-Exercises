@@ -82,10 +82,10 @@ VOut main(VIn input)
     float3 wvnormal = mul(WV, float4(input.normal, 0));
     
     // INFO: Obtain reverse eye vector
-    float3 eyer = normalize(wvpos);
+    float3 eyer = -normalize(wvpos);
     
     // INFO: Obtain reverse reflection vector
-    output.reflectionUVW = 2.0f * dot(eyer, wvnormal) * wvnormal - eyer;
+    output.reflectionUVW = 2.0 * dot(eyer, wvnormal) * wvnormal - eyer;
     
     return output;
 }

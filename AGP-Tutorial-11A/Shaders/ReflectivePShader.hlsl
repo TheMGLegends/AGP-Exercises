@@ -2,7 +2,7 @@ struct VIn
 {
     float4 position : SV_Position;
     float4 colour : COLOR;
-    float2 uv : TEXCOORD;
+    float2 uv : TEXCOORD0;
     float3 reflectedUVW : TEXCOORD1;
 };
 
