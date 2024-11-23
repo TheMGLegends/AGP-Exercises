@@ -12,7 +12,7 @@ Camera::Camera() : position{ 0.0f, 0.0f, 0.0f }, minMaxPitch{ 1.0f, 179.0f }, pi
 {
 }
 
-XMMATRIX Camera::GetViewMatrix()
+const XMMATRIX Camera::GetViewMatrix()
 {
 	XMVECTOR eyePos{ position.x, position.y, position.z };
 	XMVECTOR lookTo
