@@ -480,7 +480,8 @@ void Renderer::InitGraphics()
 	pDevice->CreateSamplerState(&samplerDesc, &pSamplerState);
 
 	// INFO: Load Models
-	model = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
+	modelSphere = new ObjFileModel{ (char*)"Assets/Models/Sphere.obj", pDevice, pDeviceContext };
+	modelCube = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
 	modelSkybox = new ObjFileModel{ (char*)"Assets/Models/cube.obj", pDevice, pDeviceContext };
 
 	// INFO: Load skybox cube map
@@ -496,11 +497,13 @@ void Renderer::InitGraphics()
 
 void Renderer::InitScene()
 {
+	// THIS DA CUBE DAT MOVE
 	cube1.SetPosition({ 0.0f, 5.0f, -10.0f });
 
 	cube2.SetPosition({ 2.0f, 0.0f, 10.0f });
 	cube2.SetRotation({ 0, XMConvertToRadians(0), 0 });
 
+	// THIS DA SPHERE
 	cube3.SetPosition({ -10.0f, 0.0f, 3.0f });
 	//cube3.SetRotation({ 0, XMConvertToRadians(-45), XMConvertToRadians(180) });
 
@@ -796,7 +799,7 @@ void Renderer::Clean()
 	if (pPSSkybox) pPSSkybox->Release();
 
 	delete modelSkybox;
-	delete model;
+	delete modelSphere;
 	spriteFont.reset();
 	//if (pTextFormat) pTextFormat->Release();
 	//if (pDWriteFactory) pDWriteFactory->Release();
@@ -961,7 +964,9 @@ void Renderer::RenderFrame()
 
 	pDeviceContext->UpdateSubresource(pConstantBuffer0, 0, 0, &cBuffer0, 0, 0);
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pConstantBuffer0);
-	pDeviceContext->DrawIndexed(36, 0, 0);
+
+	modelCube->Draw();
+	//pDeviceContext->DrawIndexed(36, 0, 0);
 
 	// INFO: Duplicate for cube 3
 	pDeviceContext->PSSetShaderResources(0, 1, &pTexture);
@@ -999,7 +1004,7 @@ void Renderer::RenderFrame()
 	pDeviceContext->UpdateSubresource(pConstantBuffer0, 0, 0, &cBuffer0, 0, 0);
 	pDeviceContext->VSSetConstantBuffers(0, 1, &pConstantBuffer0);
 
-	model->Draw();
+	modelSphere->Draw();
 
 	// INFO: Draw particle
 	pDeviceContext->VSSetShader(pVSParticle, 0, 0);

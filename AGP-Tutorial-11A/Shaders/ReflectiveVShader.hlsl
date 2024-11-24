@@ -43,7 +43,7 @@ VOut main(VIn input)
     VOut output;
     
     // INFO: Position
-    output.position = mul(WVP, float4(input.position, 1.0f));
+    output.position = mul(WVP, float4(input.position, 1));
     
     // INFO: Texture Coords
     output.uv = input.uv;
@@ -76,7 +76,7 @@ VOut main(VIn input)
     output.colour = saturate(ambientLightCol + float4(directionalFinal, 1) + float4(pointFinal, 1));
     
     // INFO: Vertex position relative to camera
-    float3 wvpos = mul(WV, float4(input.position, 0));
+    float3 wvpos = mul(WV, float4(input.position, 1));
     
     // INFO: Surface normal relative to camera
     float3 wvnormal = mul(WV, float4(input.normal, 0));
@@ -86,6 +86,7 @@ VOut main(VIn input)
     
     // INFO: Obtain reverse reflection vector
     output.reflectionUVW = 2.0 * dot(eyer, wvnormal) * wvnormal - eyer;
+    output.reflectionUVW = mul(float4(output.reflectionUVW, 0), WV);
     
     return output;
 }

@@ -106,7 +106,8 @@ private:
 	PointLight pointLights[MAX_POINT_LIGHTS];
 
 	// INFO: Model
-	ObjFileModel* model;
+	ObjFileModel* modelSphere;
+	ObjFileModel* modelCube;
 
 	// INFO: Skybox Variables
 	ID3D11RasterizerState* pRasterSolid;
